@@ -22,7 +22,7 @@ export default function Select({ label, icon: Icon, error, options, placeholder,
           }`}
           {...rest}
         >
-          <option value="">{placeholder}</option>
+          {placeholder ? <option value="">{placeholder}</option> : null}
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

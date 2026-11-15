@@ -2,9 +2,9 @@ import { Phone, PhoneCall, ShieldAlert } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import EmergencyContacts from '../components/EmergencyContacts';
 import { EMERGENCY_NUMBERS } from '../data/modules';
 
-// Base emergency screen: direct-dial links only. Richer content arrives in the Emergency module stage.
 export default function Emergency() {
   const { t } = useLanguage();
   return (
@@ -49,6 +49,8 @@ export default function Emergency() {
           ))}
         </div>
       </section>
+
+      <EmergencyContacts />
 
       <Card className="flex gap-3 border-amber-200 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10">
         <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />

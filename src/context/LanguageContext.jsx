@@ -1,8 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { translations } from '../lib/translations';
+import { part2En, part2Ta } from '../lib/translations2';
 
 const LanguageContext = createContext(null);
 const KEY = 'lifehelp-lang';
+
+const dictionary = {
+  en: { ...translations.en, ...part2En },
+  ta: { ...translations.ta, ...part2Ta },
+};
 
 function initialLang() {
   try {
@@ -28,7 +34,7 @@ export function LanguageProvider({ children }) {
 
   const setLang = useCallback((l) => setLangState(l === 'ta' ? 'ta' : 'en'), []);
   const toggleLang = useCallback(() => setLangState((l) => (l === 'en' ? 'ta' : 'en')), []);
-  const t = useCallback((key) => translations[lang][key] ?? translations.en[key] ?? key, [lang]);
+  const t = useCallback((key) => dictionary[lang][key] ?? dictionary.en[key] ?? key, [lang]);
 
   return <LanguageContext.Provider value={{ lang, setLang, toggleLang, t }}>{children}</LanguageContext.Provider>;
 }

@@ -17,6 +17,7 @@ export function authErrorKey(error) {
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
@@ -34,6 +35,22 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  const userId = session?.user?.id ?? null;
+
+  const loadProfile = useCallback(async () => {
+    if (!supabase || !userId) {
+      setProfile(null);
+      return null;
+    }
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+    setProfile(data ?? null);
+    return data ?? null;
+  }, [userId]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
   const signIn = useCallback(async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({
       email: cleanText(email).toLowerCase(),
@@ -49,10 +66,8 @@ export function AuthProvider({ children }) {
       options: { data: { full_name: cleanText(fullName), role } },
     });
     if (error) throw error;
-    // Supabase returns an obfuscated user with no identities when the email already exists.
     if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-      const e = new Error('User already registered');
-      throw e;
+      throw new Error('User already registered');
     }
     return { needsConfirmation: !data.session };
   }, []);
@@ -66,13 +81,15 @@ export function AuthProvider({ children }) {
     () => ({
       session,
       user: session?.user ?? null,
+      profile,
+      refreshProfile: loadProfile,
       loading,
       configured: isSupabaseConfigured,
       signIn,
       signUp,
       signOut,
     }),
-    [session, loading, signIn, signUp, signOut]
+    [session, profile, loadProfile, loading, signIn, signUp, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
