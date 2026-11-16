@@ -20,6 +20,7 @@ import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import Notice from '../components/ui/Notice';
 import Spinner from '../components/ui/Spinner';
+import ReportButton from '../components/report/ReportButton';
 
 const CATEGORIES = ['medical', 'food', 'education', 'shelter', 'transport', 'elderly', 'other'];
 const STATUSES = ['open', 'in_progress', 'completed'];
@@ -143,6 +144,7 @@ export default function Community() {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <Badge tone={r.kind === 'offer' ? 'brand' : 'blue'}>{t(`community.kind.${r.kind}`)}</Badge>
                   <Badge>{t(`cat.${r.category}`)}</Badge>
+                  {r.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
                   <Badge tone={STATUS_TONE[r.status]} className="ml-auto">
                     {t(`status.${r.status}`)}
                   </Badge>
@@ -275,12 +277,15 @@ function RequestDetail({ request, onClose, onChanged }) {
           <Badge tone={r.kind === 'offer' ? 'brand' : 'blue'}>{t(`community.kind.${r.kind}`)}</Badge>
           <Badge>{t(`cat.${r.category}`)}</Badge>
           <Badge tone={STATUS_TONE[r.status]}>{t(`status.${r.status}`)}</Badge>
+          {r.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
         </div>
         <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">{r.description}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           {t('common.by')} {mine ? t('common.you') : r.poster?.full_name || '—'}
           {r.poster?.ngo_verified ? ' ✔' : ''} · {[r.city, r.district].filter(Boolean).join(', ')} · {timeAgo(r.created_at, lang)}
         </p>
+
+        {!mine && <ReportButton type="help_request" id={r.id} />}
 
         {!mine && r.accepted_by === user.id && <Notice>{t('community.youAccepted')}</Notice>}
 
@@ -331,7 +336,10 @@ function RequestDetail({ request, onClose, onChanged }) {
                       {resp.responder?.full_name || '—'}
                       {resp.responder?.ngo_verified ? ' ✔' : ''}
                     </p>
-                    {r.accepted_by === resp.responder_id && <Badge tone="green" icon={UserCheck}>{t('community.acceptedHelper')}</Badge>}
+                    <div className="flex shrink-0 items-center gap-1">
+                      {r.accepted_by === resp.responder_id && <Badge tone="green" icon={UserCheck}>{t('community.acceptedHelper')}</Badge>}
+                      <ReportButton type="profile" id={resp.responder_id} />
+                    </div>
                   </div>
                   <p className="text-sm text-slate-600 dark:text-slate-300">{resp.message}</p>
                   {r.status === 'open' && (

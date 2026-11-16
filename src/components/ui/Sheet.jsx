@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 // Bottom sheet on phones, centred dialog on larger screens.
@@ -16,7 +17,7 @@ export default function Sheet({ open, onClose, title, children }) {
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 animate-fade-in bg-slate-900/55 backdrop-blur-sm" onClick={onClose} />
       <div
@@ -37,6 +38,7 @@ export default function Sheet({ open, onClose, title, children }) {
         </div>
         <div className="overflow-y-auto px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

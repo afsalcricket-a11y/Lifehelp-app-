@@ -2,9 +2,14 @@ import { Outlet } from 'react-router-dom';
 import Logo from '../ui/Logo';
 import ThemeToggle from '../ui/ThemeToggle';
 import LanguageToggle from '../ui/LanguageToggle';
+import Notice from '../ui/Notice';
 import BottomNav from './BottomNav';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function AppLayout() {
+  const { profile } = useAuth();
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/85">
@@ -21,6 +26,11 @@ export default function AppLayout() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5">
+        {profile?.is_suspended && (
+          <div className="mb-5">
+            <Notice tone="warn">{t('mod.suspendedBanner')}</Notice>
+          </div>
+        )}
         <Outlet />
       </main>
 

@@ -18,6 +18,7 @@ export function authErrorKey(error) {
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [profileFor, setProfileFor] = useState(null); // user id the loaded profile belongs to
   const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
@@ -40,10 +41,12 @@ export function AuthProvider({ children }) {
   const loadProfile = useCallback(async () => {
     if (!supabase || !userId) {
       setProfile(null);
+      setProfileFor(null);
       return null;
     }
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
     setProfile(data ?? null);
+    setProfileFor(userId);
     return data ?? null;
   }, [userId]);
 
@@ -77,11 +80,14 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }, []);
 
+  const profileLoading = Boolean(userId) && profileFor !== userId;
+
   const value = useMemo(
     () => ({
       session,
       user: session?.user ?? null,
       profile,
+      profileLoading,
       refreshProfile: loadProfile,
       loading,
       configured: isSupabaseConfigured,
@@ -89,7 +95,7 @@ export function AuthProvider({ children }) {
       signUp,
       signOut,
     }),
-    [session, profile, loadProfile, loading, signIn, signUp, signOut]
+    [session, profile, profileLoading, loadProfile, loading, signIn, signUp, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

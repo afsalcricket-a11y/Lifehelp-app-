@@ -19,6 +19,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import Notice from '../components/ui/Notice';
+import ReportButton from '../components/report/ReportButton';
 
 const TYPES = ['full_time', 'part_time', 'contract', 'internship', 'daily_wage'];
 const BLANK = { title: '', company: '', description: '', requirements: '', city: '', district: '', job_type: '', salary_min: '', salary_max: '', apply_contact: '' };
@@ -159,6 +160,7 @@ export default function Jobs() {
               <Card as="button" key={job.id} onClick={() => setSelected(job)} className="block w-full space-y-2 text-left transition active:scale-[0.99]">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold text-slate-900 dark:text-white">{job.title}</p>
+                  {job.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
                   {!job.is_active && <Badge>{t('jobs.closed')}</Badge>}
                 </div>
                 <p className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
@@ -214,6 +216,7 @@ export default function Jobs() {
                 {t('jobs.apply')}
               </Button>
             )}
+            {j.posted_by !== user.id && <ReportButton type="job" id={j.id} />}
             <Notice tone="warn">{t('jobs.safety')}</Notice>
             {j.posted_by === user.id && (
               <div className="grid gap-2">

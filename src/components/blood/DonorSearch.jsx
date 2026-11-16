@@ -12,6 +12,7 @@ import QueryState from '../ui/QueryState';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
+import ReportButton from '../report/ReportButton';
 import Sheet from '../ui/Sheet';
 import Textarea from '../ui/Textarea';
 import { validateText } from '../../lib/validators';
@@ -116,6 +117,10 @@ export default function DonorSearch() {
                     {t('blood.lastDonated')}: {new Date(d.last_donated_on).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-IN')}
                   </p>
                 )}
+
+                <div className="-mb-1 flex justify-end">
+                  <ReportButton type="profile" id={d.user_id} />
+                </div>
 
                 {numbers[d.user_id] ? (
                   <Button as="a" href={`tel:${numbers[d.user_id].replace(/[^0-9+]/g, '')}`} fullWidth icon={Phone}>

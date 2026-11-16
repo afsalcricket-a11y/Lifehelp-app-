@@ -85,6 +85,16 @@ export default function MyDonorProfile() {
     }
   }
 
+  async function requestVerification() {
+    try {
+      unwrap(await supabase.rpc('request_donor_verification'));
+      toast.success(t('blood.verificationRequested'));
+      donorQuery.reload();
+    } catch (e) {
+      toast.error(t(errorKey(e)));
+    }
+  }
+
   async function removeDonor() {
     if (!window.confirm(t('common.confirmDelete'))) return;
     try {
@@ -126,6 +136,11 @@ export default function MyDonorProfile() {
                 </div>
               )}
               {donor && <p className="-mt-2 text-xs text-slate-500 dark:text-slate-400">{t('blood.verificationHint')}</p>}
+              {donor && donor.verification_status === 'unverified' && (
+                <Button variant="secondary" fullWidth icon={ShieldCheck} onClick={requestVerification}>
+                  {t('blood.requestVerification')}
+                </Button>
+              )}
 
               <Select
                 label={t('blood.group')}

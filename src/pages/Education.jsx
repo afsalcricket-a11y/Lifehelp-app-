@@ -19,6 +19,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import Notice from '../components/ui/Notice';
+import ReportButton from '../components/report/ReportButton';
 
 const CATS = ['study_material', 'scholarship', 'course', 'exam_prep'];
 const LANGS = ['en', 'ta', 'both'];
@@ -131,6 +132,7 @@ export default function Education() {
                   <Badge tone={r.category === 'scholarship' ? 'amber' : 'brand'}>{t(`edu.cat.${r.category}`)}</Badge>
                   <Badge>{t(`edu.lang.${r.language}`)}</Badge>
                   {!r.is_active && <Badge tone="slate">{t('edu.hidden')}</Badge>}
+                  {r.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
                 </div>
                 <p className="font-semibold text-slate-900 dark:text-white">{r.title}</p>
                 {r.description && <p className="text-sm text-slate-600 dark:text-slate-300">{r.description}</p>}
@@ -144,6 +146,7 @@ export default function Education() {
                 <Button as="a" href={r.url} target="_blank" rel="noopener noreferrer nofollow" fullWidth icon={ExternalLink}>
                   {t('edu.openLink')}
                 </Button>
+                {r.posted_by !== user.id && <ReportButton type="education" id={r.id} />}
                 {r.posted_by === user.id && (
                   <div className="grid grid-cols-2 gap-2">
                     <Button variant="secondary" icon={r.is_active ? EyeOff : Eye} onClick={() => toggle(r)}>

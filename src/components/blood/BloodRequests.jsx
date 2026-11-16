@@ -13,6 +13,7 @@ import QueryState from '../ui/QueryState';
 import Card from '../ui/Card';
 import Badge, { STATUS_TONE } from '../ui/Badge';
 import Button from '../ui/Button';
+import ReportButton from '../report/ReportButton';
 import Sheet from '../ui/Sheet';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
@@ -133,12 +134,16 @@ export default function BloodRequests() {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
+                      {r.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
                       <Badge tone={STATUS_TONE[r.urgency]}>{t(`blood.urgency.${r.urgency}`)}</Badge>
                       {r.status !== 'open' && <Badge tone={STATUS_TONE[r.status]}>{t(`blood.status.${r.status}`)}</Badge>}
                     </div>
                   </div>
                   {r.note && <p className="text-sm text-slate-600 dark:text-slate-300">{r.note}</p>}
-                  <p className="text-xs text-slate-400">{timeAgo(r.created_at, lang)}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-slate-400">{timeAgo(r.created_at, lang)}</p>
+                    {!mine && <ReportButton type="blood_request" id={r.id} />}
+                  </div>
 
                   {r.status === 'open' && !mine && (
                     <Button as="a" href={`tel:${r.contact_phone.replace(/[^0-9+]/g, '')}`} fullWidth icon={Phone}>

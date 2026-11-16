@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import SplashScreen from './components/layout/SplashScreen';
 import AppLayout from './components/layout/AppLayout';
-import { ProtectedRoute, PublicOnlyRoute } from './components/layout/RouteGuards';
+import { AdminRoute, ProtectedRoute, PublicOnlyRoute } from './components/layout/RouteGuards';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -16,6 +16,7 @@ import Community from './pages/Community';
 import Jobs from './pages/Jobs';
 import Education from './pages/Education';
 import Donations from './pages/Donations';
+import Admin from './pages/Admin';
 
 export default function App() {
   const { loading } = useAuth();
@@ -47,6 +48,9 @@ export default function App() {
           <Route path="jobs" element={<Jobs />} />
           <Route path="education" element={<Education />} />
           <Route path="donations" element={<Donations />} />
+          <Route element={<AdminRoute />}>
+            <Route path="admin" element={<Admin />} />
+          </Route>
         </Route>
       </Route>
 

@@ -76,6 +76,11 @@ export default function Profile() {
         <Button as={Link} to="/profile/edit" variant="secondary" fullWidth icon={Pencil}>
           {t('pe.button')}
         </Button>
+        {profile?.is_admin && (
+          <Button as={Link} to="/admin" fullWidth icon={ShieldCheck}>
+            {t('admin.open')}
+          </Button>
+        )}
       </Card>
 
       <Card className="space-y-4">

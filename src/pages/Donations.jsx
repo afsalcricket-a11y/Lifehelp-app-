@@ -20,6 +20,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
 import Notice from '../components/ui/Notice';
+import ReportButton from '../components/report/ReportButton';
 
 const CATS = ['books', 'clothes', 'food', 'household', 'other'];
 const CONDS = ['new', 'good', 'fair'];
@@ -191,9 +192,12 @@ function Browse() {
                   <MapPin className="h-3.5 w-3.5" />
                   {[i.city, i.district].filter(Boolean).join(', ')} · {timeAgo(i.created_at, lang)}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {t('common.by')} {i.donor_id === user.id ? t('common.you') : i.donor?.full_name || '—'}
-                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {t('common.by')} {i.donor_id === user.id ? t('common.you') : i.donor?.full_name || '—'}
+                  </p>
+                  {i.donor_id !== user.id && <ReportButton type="donation" id={i.id} />}
+                </div>
                 {i.donor_id !== user.id &&
                   (i.myRequest ? (
                     <Button fullWidth variant="secondary" disabled>
@@ -290,7 +294,10 @@ function Mine() {
                           {t(`don.cat.${i.category}`)} · ×{i.quantity} · {timeAgo(i.created_at, lang)}
                         </p>
                       </div>
-                      <Badge tone={STATUS_TONE[i.status]}>{t(`don.status.${i.status}`)}</Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        {i.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
+                        <Badge tone={STATUS_TONE[i.status]}>{t(`don.status.${i.status}`)}</Badge>
+                      </div>
                     </div>
 
                     {i.requests.length === 0 ? (
@@ -302,6 +309,7 @@ function Mine() {
                             <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{r.requester?.full_name || '—'}</p>
                             <div className="flex shrink-0 items-center gap-1.5">
                               {r.requester?.ngo_verified && <Badge tone="green">{t('don.verifiedOrg')}</Badge>}
+                              <ReportButton type="profile" id={r.requester_id} />
                               <Badge tone={STATUS_TONE[r.status]}>{t(`don.${r.status}`)}</Badge>
                             </div>
                           </div>
