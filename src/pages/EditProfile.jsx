@@ -14,6 +14,8 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Notice from '../components/ui/Notice';
 import PageLoader from '../components/ui/PageLoader';
+import GpsButton from '../components/geo/GpsButton';
+import { roundCoord } from '../lib/geo';
 
 export default function EditProfile() {
   const { t, lang } = useLanguage();
@@ -23,6 +25,7 @@ export default function EditProfile() {
   const [form, setForm] = useState(null);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
+  const [coords, setCoords] = useState(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -78,6 +81,7 @@ export default function EditProfile() {
             is_volunteer: form.is_volunteer,
             ngo_name: emptyToNull(form.ngo_name),
             preferred_language: lang,
+            ...(coords ? { latitude: roundCoord(coords.lat), longitude: roundCoord(coords.lon) } : {}),
           })
           .eq('id', user.id)
       );
@@ -120,6 +124,13 @@ export default function EditProfile() {
           <Input label={t('common.district')} maxLength={60} value={form.district} onChange={set('district')} error={errors.district && t(errors.district)} />
         </div>
         <Input label={t('common.state')} maxLength={60} value={form.state} onChange={set('state')} error={errors.state && t(errors.state)} />
+        <div className="space-y-2">
+          <GpsButton done={Boolean(coords)} label={t('geo.profileSave')} doneLabel={t('geo.profileSaved')} onFix={setCoords} />
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {typeof profile.latitude === 'number' ? `${t('geo.hasProfileLocation')} ` : ''}
+            {t('geo.noGpsFallback')} {t('geo.privacy')}
+          </p>
+        </div>
         <Select
           label={`${t('blood.group')} (${t('common.optional')})`}
           icon={Droplets}

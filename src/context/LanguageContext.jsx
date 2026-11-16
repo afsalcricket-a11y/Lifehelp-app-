@@ -2,13 +2,14 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { translations } from '../lib/translations';
 import { part2En, part2Ta } from '../lib/translations2';
 import { part3En, part3Ta } from '../lib/translations3';
+import { part4En, part4Ta } from '../lib/translations4';
 
 const LanguageContext = createContext(null);
 const KEY = 'lifehelp-lang';
 
 const dictionary = {
-  en: { ...translations.en, ...part2En, ...part3En },
-  ta: { ...translations.ta, ...part2Ta, ...part3Ta },
+  en: { ...translations.en, ...part2En, ...part3En, ...part4En },
+  ta: { ...translations.ta, ...part2Ta, ...part3Ta, ...part4Ta },
 };
 
 function initialLang() {

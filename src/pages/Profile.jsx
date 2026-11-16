@@ -8,6 +8,7 @@ import { useToast } from '../context/ToastContext';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import InstallCard from '../components/InstallCard';
 
 function Segmented({ value, onChange, options }) {
   return (
@@ -108,10 +109,12 @@ export default function Profile() {
         </div>
       </Card>
 
+      <InstallCard />
+
       <Button variant="secondary" fullWidth icon={LogOut} loading={busy} onClick={onSignOut}>
         {t('profile.signOut')}
       </Button>
-      <p className="text-center text-xs text-slate-400">LIFEHELP v0.2.0</p>
+      <p className="text-center text-xs text-slate-400">LIFEHELP v0.4.0</p>
     </div>
   );
 }

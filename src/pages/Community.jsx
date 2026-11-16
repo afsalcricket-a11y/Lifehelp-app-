@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { HandHeart, MapPin, Plus, Send, Check, Trash2, Ban, UserCheck } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { HandHeart, MapPin, MapPinOff, Plus, Send, Check, Trash2, Ban, UserCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { cleanTerm, emptyToNull, errorKey, fetchProfiles, locationFilter, timeAgo, unwrap } from '../lib/db';
 import { useAsync, useDebounced } from '../lib/useAsync';
@@ -21,6 +21,16 @@ import Textarea from '../components/ui/Textarea';
 import Notice from '../components/ui/Notice';
 import Spinner from '../components/ui/Spinner';
 import ReportButton from '../components/report/ReportButton';
+import EmptyState from '../components/ui/EmptyState';
+import NearFilters from '../components/geo/NearFilters';
+import DistanceBadge from '../components/geo/DistanceBadge';
+import GpsButton from '../components/geo/GpsButton';
+import ViewToggle from '../components/geo/ViewToggle';
+import MapView from '../components/geo/MapView';
+import { useNearFilter } from '../lib/useNearFilter';
+import { applyNearFilter, hasCoords, roundCoord, withDistance } from '../lib/geo';
+
+const CAT_ICON = { medical: '🏥', food: '🍲', education: '📚', shelter: '🏠', transport: '🚌', elderly: '🧓', other: '❓' };
 
 const CATEGORIES = ['medical', 'food', 'education', 'shelter', 'transport', 'elderly', 'other'];
 const STATUSES = ['open', 'in_progress', 'completed'];
@@ -42,6 +52,11 @@ export default function Community() {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
 
+  const near = useNearFilter();
+  const [view, setView] = useState('list');
+  const [selectedId, setSelectedId] = useState(null);
+  const [postCoords, setPostCoords] = useState(null);
+
   const query = useAsync(async () => {
     let q = supabase.from('help_requests').select('*').order('created_at', { ascending: false }).limit(100);
     if (kind) q = q.eq('kind', kind);
@@ -54,12 +69,33 @@ export default function Community() {
     return rows.map((r) => ({ ...r, poster: people[r.user_id] }));
   }, [kind, category, status, mineOnly, dLoc]);
 
+  // distance + "sort nearest" + radius, computed in the browser from approximate coordinates
+  const items = useMemo(
+    () => applyNearFilter(withDistance(query.data || [], near.origin), { origin: near.origin, sortNearest: near.sortNearest, radius: near.radius }),
+    [query.data, near.origin, near.sortNearest, near.radius]
+  );
+  const markers = useMemo(
+    () =>
+      items.filter(hasCoords).map((r) => ({
+        id: r.id,
+        lat: r.latitude,
+        lon: r.longitude,
+        label: CAT_ICON[r.category] || '❓',
+        color: r.kind === 'offer' ? '#059669' : '#2563eb',
+        title: r.title,
+      })),
+    [items]
+  );
+  const selectedPost = items.find((r) => r.id === selectedId) || null;
+  const withoutLocation = items.length - markers.length;
+
   const set = (f) => (e) => {
     setForm((x) => ({ ...x, [f]: e.target.value }));
     setErrors((x) => ({ ...x, [f]: '' }));
   };
 
   function openForm() {
+    setPostCoords(null);
     setForm({ ...BLANK, city: profile?.city || '', district: profile?.district || '', kind: profile?.is_volunteer ? 'offer' : 'request' });
     setErrors({});
     setFormOpen(true);
@@ -86,6 +122,7 @@ export default function Community() {
           description: form.description.trim(),
           city: form.city.trim(),
           district: emptyToNull(form.district),
+          ...(postCoords ? { latitude: roundCoord(postCoords.lat), longitude: roundCoord(postCoords.lon) } : {}),
         })
       );
       toast.success(t('common.posted'));
@@ -136,29 +173,32 @@ export default function Community() {
         </div>
       </div>
 
-      <QueryState query={query} isEmpty={(d) => !d.length}>
-        {(rows) => (
-          <div className="space-y-3">
-            {rows.map((r) => (
-              <Card as="button" key={r.id} onClick={() => setSelected(r)} className="block w-full space-y-2 text-left transition active:scale-[0.99]">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Badge tone={r.kind === 'offer' ? 'brand' : 'blue'}>{t(`community.kind.${r.kind}`)}</Badge>
-                  <Badge>{t(`cat.${r.category}`)}</Badge>
-                  {r.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
-                  <Badge tone={STATUS_TONE[r.status]} className="ml-auto">
-                    {t(`status.${r.status}`)}
-                  </Badge>
-                </div>
-                <p className="font-semibold text-slate-900 dark:text-white">{r.title}</p>
-                <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{r.description}</p>
-                <p className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {[r.city, r.district].filter(Boolean).join(', ')} · {timeAgo(r.created_at, lang)}
+      <NearFilters near={near} />
+      <ViewToggle value={view} onChange={setView} />
+
+      <QueryState query={query} isEmpty={() => !items.length}>
+        {() =>
+          view === 'list' ? (
+            <div className="space-y-3">
+              {items.map((r) => (
+                <PostCard key={r.id} r={r} onOpen={() => setSelected(r)} />
+              ))}
+            </div>
+          ) : markers.length ? (
+            <div className="space-y-3">
+              <MapView markers={markers} selectedId={selectedId} onSelect={setSelectedId} origin={near.origin} youLabel={t('map.you')} />
+              {withoutLocation > 0 && (
+                <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  <MapPinOff className="h-3.5 w-3.5" />
+                  {withoutLocation} {t('map.hidden')}
                 </p>
-              </Card>
-            ))}
-          </div>
-        )}
+              )}
+              {selectedPost ? <PostCard r={selectedPost} onOpen={() => setSelected(selectedPost)} /> : <p className="text-center text-sm text-slate-500 dark:text-slate-400">{t('map.tapPin')}</p>}
+            </div>
+          ) : (
+            <EmptyState icon={MapPinOff} title={t('map.noPins')} text={t('map.noPinsHint')} />
+          )
+        }
       </QueryState>
 
       <Sheet open={formOpen} onClose={() => setFormOpen(false)} title={t('community.new')}>
@@ -187,6 +227,10 @@ export default function Community() {
             <Input label={t('common.city')} maxLength={60} value={form.city} onChange={set('city')} error={errors.city && t(errors.city)} />
             <Input label={`${t('common.district')} (${t('common.optional')})`} maxLength={60} value={form.district} onChange={set('district')} error={errors.district && t(errors.district)} />
           </div>
+          <GpsButton done={Boolean(postCoords)} label={t('geo.attachPost')} onFix={setPostCoords} />
+          <p className="-mt-2 text-xs text-slate-500 dark:text-slate-400">
+            {t('geo.noGpsFallback')} {t('geo.privacy')}
+          </p>
           <Button fullWidth loading={busy} onClick={submit}>
             {t('common.post')}
           </Button>
@@ -370,5 +414,30 @@ function RequestDetail({ request, onClose, onChanged }) {
         )}
       </div>
     </Sheet>
+  );
+}
+
+function PostCard({ r, onOpen }) {
+  const { t, lang } = useLanguage();
+  return (
+    <Card as="button" onClick={onOpen} className="block w-full space-y-2 text-left transition active:scale-[0.99]">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge tone={r.kind === 'offer' ? 'brand' : 'blue'}>{t(`community.kind.${r.kind}`)}</Badge>
+        <Badge>{t(`cat.${r.category}`)}</Badge>
+        {r.is_hidden && <Badge tone="red">{t('mod.hidden')}</Badge>}
+        <Badge tone={STATUS_TONE[r.status]} className="ml-auto">
+          {t(`status.${r.status}`)}
+        </Badge>
+      </div>
+      <p className="font-semibold text-slate-900 dark:text-white">{r.title}</p>
+      <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{r.description}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <DistanceBadge km={r.distanceKm} />
+        <p className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+          <MapPin className="h-3.5 w-3.5" />
+          {[r.city, r.district].filter(Boolean).join(', ')} · {timeAgo(r.created_at, lang)}
+        </p>
+      </div>
+    </Card>
   );
 }

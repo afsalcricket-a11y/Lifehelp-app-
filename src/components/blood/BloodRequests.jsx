@@ -14,6 +14,11 @@ import Card from '../ui/Card';
 import Badge, { STATUS_TONE } from '../ui/Badge';
 import Button from '../ui/Button';
 import ReportButton from '../report/ReportButton';
+import NearFilters from '../geo/NearFilters';
+import DistanceBadge from '../geo/DistanceBadge';
+import GpsButton from '../geo/GpsButton';
+import { useNearFilter } from '../../lib/useNearFilter';
+import { applyNearFilter, roundCoord, withDistance } from '../../lib/geo';
 import Sheet from '../ui/Sheet';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
@@ -33,6 +38,10 @@ export default function BloodRequests() {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
 
+  const near = useNearFilter();
+  const [postCoords, setPostCoords] = useState(null);
+  const nearView = (rows) => applyNearFilter(withDistance(rows, near.origin), near);
+
   const query = useAsync(async () => {
     let q = supabase.from('blood_requests').select('*').order('created_at', { ascending: false }).limit(100);
     if (group) q = q.eq('blood_group', group);
@@ -46,6 +55,7 @@ export default function BloodRequests() {
   };
 
   function openForm() {
+    setPostCoords(null);
     setForm({ ...BLANK, city: profile?.city || '', district: profile?.district || '', contact_phone: profile?.phone || '', blood_group: profile?.blood_group || '' });
     setErrors({});
     setOpen(true);
@@ -77,6 +87,7 @@ export default function BloodRequests() {
           urgency: form.urgency,
           contact_phone: form.contact_phone.trim(),
           note: emptyToNull(form.note),
+          ...(postCoords ? { latitude: roundCoord(postCoords.lat), longitude: roundCoord(postCoords.lon) } : {}),
         })
       );
       toast.success(t('common.posted'));
@@ -106,13 +117,14 @@ export default function BloodRequests() {
       <Button fullWidth icon={Plus} onClick={openForm}>
         {t('blood.req.new')}
       </Button>
+      <NearFilters near={near} />
       <FilterChips label={t('blood.group')} options={groupOptions} value={group} onChange={setGroup} />
       <SearchBar value={loc} onChange={setLoc} placeholder={t('common.location')} />
 
-      <QueryState query={query} isEmpty={(d) => !d.length} emptyTitle={t('blood.req.empty')}>
+      <QueryState query={query} isEmpty={(d) => !nearView(d).length} emptyTitle={t('blood.req.empty')}>
         {(rows) => (
           <div className="space-y-3">
-            {rows.map((r) => {
+            {nearView(rows).map((r) => {
               const mine = r.requester_id === user.id;
               return (
                 <Card key={r.id} className="space-y-3">
@@ -141,7 +153,10 @@ export default function BloodRequests() {
                   </div>
                   {r.note && <p className="text-sm text-slate-600 dark:text-slate-300">{r.note}</p>}
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-slate-400">{timeAgo(r.created_at, lang)}</p>
+                    <div className="flex items-center gap-2">
+                      <DistanceBadge km={r.distanceKm} />
+                      <p className="text-xs text-slate-400">{timeAgo(r.created_at, lang)}</p>
+                    </div>
                     {!mine && <ReportButton type="blood_request" id={r.id} />}
                   </div>
 
@@ -195,6 +210,10 @@ export default function BloodRequests() {
           </div>
           <Input label={t('blood.req.contact')} icon={Phone} type="tel" inputMode="tel" maxLength={15} value={form.contact_phone} onChange={set('contact_phone')} error={errors.contact_phone && t(errors.contact_phone)} />
           <Textarea label={t('blood.req.note')} rows={3} maxLength={500} value={form.note} onChange={set('note')} error={errors.note && t(errors.note)} />
+          <GpsButton done={Boolean(postCoords)} label={t('geo.attachPost')} onFix={setPostCoords} />
+          <p className="-mt-2 text-xs text-slate-500 dark:text-slate-400">
+            {t('geo.noGpsFallback')} {t('geo.privacy')}
+          </p>
           <Button fullWidth loading={busy} onClick={submit}>
             {t('common.post')}
           </Button>

@@ -1,0 +1,47 @@
+// Part 4 strings (GPS, map, install). Each key: [English, Tamil]
+const S = {
+  'geo.useGps': ['Use current GPS location', 'தற்போதைய GPS இடத்தைப் பயன்படுத்து'],
+  'geo.found': ['Location found', 'இருப்பிடம் கிடைத்தது'],
+  'geo.gpsActive': ['Using your GPS position. It is not saved.', 'உங்கள் GPS இடத்தைப் பயன்படுத்துகிறது. இது சேமிக்கப்படாது.'],
+  'geo.usingCity': ['Measuring from the centre of', 'தூரம் கணக்கிடப்படுவது'],
+  'geo.profileOrigin': ['Measuring from your saved profile location.', 'உங்கள் சுயவிவர இடத்திலிருந்து தூரம் கணக்கிடப்படுகிறது.'],
+  'geo.needOrigin': ['Turn on GPS or choose a city to see distances.', 'தூரத்தைக் காண GPS ஐ இயக்கவும் அல்லது நகரத்தைத் தேர்ந்தெடுக்கவும்.'],
+  'geo.chooseCity': ['Or choose a city / district', 'அல்லது நகரம் / மாவட்டத்தைத் தேர்ந்தெடுக்கவும்'],
+  'geo.sortNearest': ['Sort by nearest', 'அருகிலுள்ளவை முதலில்'],
+  'geo.radiusAll': ['All', 'அனைத்தும்'],
+  'geo.km': ['km', 'கி.மீ'],
+  'geo.kmAway': ['km away', 'கி.மீ தொலைவில்'],
+  'geo.under1': ['Under 1 km away', '1 கி.மீக்குள்'],
+  'geo.denied': ['Location permission was denied. You can choose a city instead.', 'இருப்பிட அனுமதி மறுக்கப்பட்டது. நகரத்தைத் தேர்ந்தெடுக்கலாம்.'],
+  'geo.unavailable': ['Could not get your position. Try again or choose a city.', 'உங்கள் இடத்தைப் பெற முடியவில்லை. மீண்டும் முயலுங்கள் அல்லது நகரத்தைத் தேர்ந்தெடுங்கள்.'],
+  'geo.timeout': ['Finding your position took too long. Try again.', 'உங்கள் இடத்தைக் கண்டறிய நீண்ட நேரமானது. மீண்டும் முயலுங்கள்.'],
+  'geo.unsupported': ['This browser does not support GPS.', 'இந்த உலாவி GPS ஐ ஆதரிக்கவில்லை.'],
+  'geo.attached': ['Approximate GPS location attached', 'தோராயமான GPS இடம் இணைக்கப்பட்டது'],
+  'geo.attachPost': ['Use GPS for this post', 'இந்தப் பதிவுக்கு GPS ஐப் பயன்படுத்து'],
+  'geo.noGpsFallback': ['No GPS? We place this at the centre of the city or district you typed.', 'GPS இல்லையா? நீங்கள் உள்ளிட்ட நகரம் / மாவட்டத்தின் மையத்தில் வைக்கப்படும்.'],
+  'geo.privacy': ['Only an approximate location (about 1 km) is saved. Your exact position is never stored.', 'தோராயமான இடம் (சுமார் 1 கி.மீ) மட்டுமே சேமிக்கப்படும். உங்கள் துல்லிய இடம் சேமிக்கப்படாது.'],
+  'geo.profileSave': ['Save my approximate location', 'என் தோராய இடத்தைச் சேமி'],
+  'geo.profileSaved': ['Location will be saved with your profile', 'உங்கள் சுயவிவரத்துடன் இடம் சேமிக்கப்படும்'],
+  'geo.hasProfileLocation': ['An approximate location is saved on your profile.', 'உங்கள் சுயவிவரத்தில் தோராய இடம் சேமிக்கப்பட்டுள்ளது.'],
+  'geo.noLocation': ['No location', 'இடம் இல்லை'],
+
+  'view.list': ['List', 'பட்டியல்'],
+  'view.map': ['Map', 'வரைபடம்'],
+  'map.noPins': ['Nothing to show on the map yet', 'வரைபடத்தில் காட்ட எதுவும் இல்லை'],
+  'map.noPinsHint': ['Items appear here once they have a location.', 'இடம் உள்ள பதிவுகள் இங்கு தோன்றும்.'],
+  'map.tapPin': ['Tap a pin to see details', 'விவரங்களைக் காண ஒரு குறியைத் தட்டவும்'],
+  'map.you': ['You are here', 'நீங்கள் இங்கே'],
+  'map.openDetails': ['Open details', 'விவரங்களைத் திற'],
+  'map.credit': ['Map data © OpenStreetMap contributors', 'வரைபடத் தரவு © OpenStreetMap பங்களிப்பாளர்கள்'],
+  'map.hidden': ['without a location are only in the list', 'இடம் இல்லாதவை பட்டியலில் மட்டும் உள்ளன'],
+
+  'install.title': ['Install LIFEHELP', 'LIFEHELP ஐ நிறுவுங்கள்'],
+  'install.text': ['Add LIFEHELP to your home screen to open it like an app.', 'LIFEHELP ஐ முகப்புத் திரையில் சேர்த்து செயலியாகத் திறக்கலாம்.'],
+  'install.button': ['Add to Home Screen', 'முகப்புத் திரையில் சேர்'],
+  'install.ios': ['On iPhone: tap the Share button, then "Add to Home Screen".', 'iPhone இல்: பகிர் பொத்தானைத் தட்டி, "Add to Home Screen" ஐத் தேர்ந்தெடுக்கவும்.'],
+  'install.manual': ['In your browser menu, choose "Install app" or "Add to Home screen".', 'உலாவி மெனுவில் "Install app" அல்லது "Add to Home screen" ஐத் தேர்ந்தெடுக்கவும்.'],
+  'install.done': ['LIFEHELP is installed on this device.', 'இந்தச் சாதனத்தில் LIFEHELP நிறுவப்பட்டுள்ளது.'],
+};
+
+export const part4En = Object.fromEntries(Object.entries(S).map(([k, v]) => [k, v[0]]));
+export const part4Ta = Object.fromEntries(Object.entries(S).map(([k, v]) => [k, v[1]]));

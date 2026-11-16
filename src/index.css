@@ -32,3 +32,46 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Map pins (Leaflet divIcon) */
+.lh-pin {
+  background: transparent;
+  border: 0;
+}
+.lh-pin-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 14px;
+  background: var(--pin, #e11d48);
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.35);
+}
+.lh-pin-body::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 12px;
+  height: 12px;
+  background: var(--pin, #e11d48);
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: translateX(-50%) rotate(45deg);
+  border-bottom-right-radius: 3px;
+}
+.lh-pin-selected {
+  transform: scale(1.18);
+  outline: 3px solid rgba(37, 99, 235, 0.55);
+}
+.leaflet-container {
+  font-family: inherit;
+}

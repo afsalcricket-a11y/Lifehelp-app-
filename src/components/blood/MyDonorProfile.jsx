@@ -14,6 +14,8 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Notice from '../ui/Notice';
+import GpsButton from '../geo/GpsButton';
+import { roundCoord } from '../../lib/geo';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -33,6 +35,7 @@ export default function MyDonorProfile() {
   const [form, setForm] = useState(null);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
+  const [coords, setCoords] = useState(null);
 
   useEffect(() => {
     if (donor === null) return;
@@ -71,6 +74,7 @@ export default function MyDonorProfile() {
       contact_phone: form.contact_phone.trim(),
       last_donated_on: form.last_donated_on || null,
       is_available: form.is_available,
+      ...(coords ? { latitude: roundCoord(coords.lat), longitude: roundCoord(coords.lon) } : {}),
     };
     setBusy(true);
     try {
@@ -156,6 +160,12 @@ export default function MyDonorProfile() {
                 <Input label={`${t('common.district')} (${t('common.optional')})`} maxLength={60} value={form.district} onChange={set('district')} error={errors.district && t(errors.district)} />
               </div>
               <Input label={t('blood.contactPhone')} icon={Phone} type="tel" inputMode="tel" maxLength={15} value={form.contact_phone} onChange={set('contact_phone')} error={errors.contact_phone && t(errors.contact_phone)} />
+              <div className="space-y-2">
+                <GpsButton done={Boolean(coords)} label={t('geo.useGps')} onFix={setCoords} />
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {t('geo.noGpsFallback')} {t('geo.privacy')}
+                </p>
+              </div>
               <Input label={`${t('blood.lastDonatedOn')} (${t('common.optional')})`} type="date" max={today()} value={form.last_donated_on} onChange={set('last_donated_on')} error={errors.last_donated_on && t(errors.last_donated_on)} />
 
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-slate-200 p-3.5 dark:border-slate-700">
